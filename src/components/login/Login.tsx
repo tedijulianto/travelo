@@ -1,36 +1,61 @@
 import Layout from "../layouts/Layout";
 import Button from "../Button";
-import { Resolver, useForm } from "react-hook-form";
+import { FieldValues, Resolver, SubmitHandler, useForm } from "react-hook-form";
 import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { PiWarningBold } from "react-icons/pi";
+import Input from "../Input";
+import Link from "next/link";
+import { REG_EXP } from "@/constants/regexp";
 
 type FormValues = {
   email: string;
   password: string;
 };
 
-const resolver: Resolver<FormValues> = async (values) => {
-  return {
-    values: !values.email ? {} : values,
-    errors: !values.email
-      ? {
-          email: {
-            type: "required",
-            message: "Email tidak boleh kosong!",
-          },
-        }
-      : {},
-  };
-};
+// const resolver: Resolver<FormValues> = async (values) => {
+//   return {
+//     values: !values.email ? {} : values,
+//     errors: !values.email
+//       ? {
+//           email: {
+//             type: "required",
+//             message: "Email tidak boleh kosong!",
+//           },
+//         }
+//       : {},
+//   };
+// };
 
 const Login = () => {
-  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [type, setType] = useState("password");
   const [icon, setIcon] = useState(<FaEyeSlash className="h-6 w-6 text-gray-100" />);
 
-  const handleToggle = () => {
-    if (type === "password") {
+  // const handleToggle = () => {
+  //   if (type === "password") {
+  //     setIcon(<FaEye className="h-6 w-6 text-gray-100" />);
+  //     setType("text");
+  //   } else {
+  //     setIcon(<FaEyeSlash className="h-6 w-6 text-gray-100" />);
+  //     setType("password");
+  //   }
+  // };
+
+  // const {
+  //   register,
+  //   handleSubmit,
+  //   formState: { errors },
+  // } = useForm<FormValues>({
+  //   resolver: resolver,
+  // });
+
+  // const onSubmit = handleSubmit((data) => alert(JSON.stringify(data)));
+
+  const handleShowPassword = () => {
+    setShowPassword((prev) => !prev);
+
+    if (type === "password" && !showPassword) {
       setIcon(<FaEye className="h-6 w-6 text-gray-100" />);
       setType("text");
     } else {
@@ -43,15 +68,23 @@ const Login = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormValues>({
-    resolver: resolver,
+  } = useForm<FieldValues>({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
 
-  const onSubmit = handleSubmit((data) => alert(JSON.stringify(data)));
+  const onSubmit: SubmitHandler<FieldValues> = (data) => {
+    console.log(data);
+  };
 
   return (
     <Layout nofooter>
-      <section className="relative h-screen pt-[85px] bg-login bg-no-repeat bg-left-top bg-contain">
+      <section>
+        <div className="h-screen">
+          <img src="/assets/login-bg.png" alt="bg login" className="h-full w-1/2" />
+        </div>
         <div className="flex flex-1 flex-col absolute left-[60%] top-[23%] min-w-[393px]">
           <p className="text-2xl font-label font-extrabold">Masuk</p>
 
@@ -62,48 +95,45 @@ const Login = () => {
             </a>
           </div>
 
-          <form onSubmit={onSubmit} className="flex flex-col mt-8">
-            <label className="relative text-sm font-label font-bold w-full">
-              <div className="mb-3">Email</div>
-              <input
-                type="email"
-                autoComplete="current-email"
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col mt-8">
+            <div className="flex flex-col gap-4 relative">
+              <Input
+                id="email"
+                label="Email"
                 placeholder="Masukkan alamat email"
-                className="appearance-none border rounded-lg border-gray-70 py-3 px-4 w-full focus:outline-none focus:ring-blue-100 focus:border-blue-100"
-                {...register("email")}
+                register={register}
+                errors={errors}
+                required={{ value: true, message: "Email tidak boleh kosong!" }}
+                pattern={{ value: REG_EXP.email, message: "Email tidak valid!" }}
               />
-              {errors?.email && (
-                <div className="mt-2 flex items-center gap-1 text-red-100">
-                  <PiWarningBold className="h-4 w-4" />
-                  <p className="text-xs">{errors.email.message}</p>
-                </div>
-              )}
-            </label>
-
-            <label className="relative text-sm font-label font-bold w-full mt-6">
-              <div className="mb-3">Password</div>
-              <input
-                type={type}
-                name="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
+              <Input
+                id="password"
+                label="Password"
                 placeholder="Masukkan password"
-                className="appearance-none border rounded-lg border-gray-70 py-3 px-4 w-full focus:outline-none focus:ring-blue-100 focus:border-blue-100"
+                register={register}
+                errors={errors}
+                type={type}
+                required={{ value: true, message: "Password tidak boleh kosong!" }}
               />
-
               <button
-                onClick={handleToggle}
+                onClick={handleShowPassword}
                 type="button"
-                className="h-6 w-6 right-0 top-[70%] absolute -translate-x-1/2 -translate-y-1/2"
+                className={`h-6 w-6 right-0 absolute -translate-x-1/2 -translate-y-1/2 
+                ${errors.email ? "top-[87%]" : "top-[86%]"}
+                ${errors.password ? "top-[75%]" : "top-[86%]"}
+                ${errors.email && errors.password ? "top-[164px]" : "top-[86%]"}
+                `}
               >
                 {icon}
               </button>
-            </label>
+            </div>
 
-            <a href="#" className="text-sm text-blue-100 font-semibold mt-8 mb-4 hover:underline">
+            <Link
+              href="#"
+              className="text-sm text-blue-100 font-semibold mt-8 mb-4 hover:underline"
+            >
               Lupa password?
-            </a>
+            </Link>
 
             <Button type="submit" className="w-full">
               Masuk
