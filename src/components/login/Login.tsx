@@ -73,6 +73,7 @@ const Login = () => {
       email: "",
       password: "",
     },
+    mode: "all",
   });
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
@@ -119,9 +120,15 @@ const Login = () => {
                 onClick={handleShowPassword}
                 type="button"
                 className={`h-6 w-6 right-0 absolute -translate-x-1/2 -translate-y-1/2 
-                ${errors.email ? "top-[87%]" : "top-[86%]"}
-                ${errors.password ? "top-[75%]" : "top-[86%]"}
-                ${errors.email && errors.password ? "top-[164px]" : "top-[86%]"}
+                ${
+                  errors.email && errors.password
+                    ? "top-[165px]"
+                    : `${
+                        errors.email
+                          ? "top-[165px]"
+                          : `${errors.password ? "top-[75%]" : "top-[86%]"}`
+                      }`
+                }
                 `}
               >
                 {icon}
